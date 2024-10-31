@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
+import 'createdisposisi.dart'; // Import CreateDisposisi
 
 class DetailSuratMasukPage extends StatefulWidget {
   final String nomorSurat;
@@ -122,6 +123,16 @@ class _DetailSuratMasukPageState extends State<DetailSuratMasukPage> {
     }
   }
 
+  void _createDisposisi(BuildContext context) async {
+    // Navigasi ke halaman CreateDisposisi
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CreateDisposisi(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -166,6 +177,12 @@ class _DetailSuratMasukPageState extends State<DetailSuratMasukPage> {
             ElevatedButton(
               onPressed: () => _editSurat(context),
               child: Text('Edit Surat'),
+            ),
+            SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: () => _createDisposisi(
+                  context), // Tambahkan tombol untuk membuat disposisi
+              child: Text('Buat Disposisi'),
             ),
           ],
         ),

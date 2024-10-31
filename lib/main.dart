@@ -36,6 +36,7 @@ class _MyAppState extends State<MyApp> {
       _token = prefs.getString('token');
       _isLoading = false;
     });
+    print(_token);
   }
 
   // Function for logout
@@ -103,7 +104,6 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  // Error route for unknown pages
   Route<dynamic> _errorRoute() {
     return MaterialPageRoute(
       builder: (context) {

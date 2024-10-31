@@ -20,7 +20,8 @@ class _LoginPageState extends State<LoginPage> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('id', id);
     await prefs.setString('token', token);
-    print('Data login tersimpan');
+    // print(id);
+    // print(token);
   }
 
   // Fungsi untuk login
@@ -45,8 +46,8 @@ class _LoginPageState extends State<LoginPage> {
         if (response.statusCode == 200) {
           var data = jsonDecode(response.body);
           var token = data['token'];
-          var userId = data['id'].toString(); // Ambil id dari respons
-
+          var userId = data['user']['id'].toString(); // Ambil id dari respons
+          // print(userId);
           // Simpan id dan token ke shared_preferences
           await _saveLoginData(userId, token);
 
