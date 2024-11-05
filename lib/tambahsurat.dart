@@ -25,7 +25,7 @@ class _TambahSuratPageState extends State<TambahSuratPage> {
   Future<void> _tambahSurat() async {
     var request = http.MultipartRequest(
       'POST',
-      Uri.parse('http://192.168.102.246:8000/api/surat_masuks'),
+      Uri.parse('http://192.168.62.246:8000/api/surat_masuks'),
     );
 
     request.fields['nomor_surat'] = _nomorSuratController.text;

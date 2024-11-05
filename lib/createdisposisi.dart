@@ -3,36 +3,61 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class CreateDisposisi extends StatefulWidget {
+  final String nomorSurat;
+  final String pengirim;
+  final String tujuan;
+  final String perihal;
+
+  CreateDisposisi({
+    required this.nomorSurat,
+    required this.pengirim,
+    required this.tujuan,
+    required this.perihal,
+  });
+
   @override
   _CreateDisposisiState createState() => _CreateDisposisiState();
 }
 
 class _CreateDisposisiState extends State<CreateDisposisi> {
   final _formKey = GlobalKey<FormState>();
-  TextEditingController suratIdController = TextEditingController();
-  TextEditingController pengirimIdController = TextEditingController();
-  TextEditingController penerimaIdController = TextEditingController();
-  TextEditingController disposisiController = TextEditingController();
+  late TextEditingController suratIdController;
+  late TextEditingController penerimaIdController;
+  late TextEditingController disposisiController;
   TextEditingController keteranganController = TextEditingController();
   TextEditingController statusController = TextEditingController();
   TextEditingController tglVerifikasiController = TextEditingController();
+  TextEditingController pengirimIdController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    suratIdController = TextEditingController(text: widget.nomorSurat);
+    penerimaIdController = TextEditingController(text: widget.tujuan);
+    disposisiController = TextEditingController(text: widget.perihal);
+    pengirimIdController = TextEditingController(text: widget.pengirim);
+  }
 
   Future<void> createDisposisi() async {
+    final body = jsonEncode({
+      'surat_id': suratIdController.text,
+      'pengirim_id': pengirimIdController.text,
+      'penerima_id': penerimaIdController.text,
+      'disposisi': disposisiController.text,
+      'keterangan': keteranganController.text,
+      'status': statusController.text,
+      'tgl_verifikasi': tglVerifikasiController.text,
+      'Read': 0,
+    });
+
+    print("Data dikirim: $body"); // Debug print untuk memeriksa data
+
     final response = await http.post(
-      Uri.parse('http://192.168.102.246:8000/api/disposisis'),
+      Uri.parse('http://192.168.62.246:8000/api/disposisis'),
       headers: {
         'Content-Type': 'application/json',
       },
-      body: jsonEncode({
-        'surat_id': suratIdController.text,
-        'pengirim_id': pengirimIdController.text,
-        'penerima_id': penerimaIdController.text,
-        'disposisi': disposisiController.text,
-        'keterangan': keteranganController.text,
-        'status': statusController.text,
-        'tgl_verifikasi': tglVerifikasiController.text,
-        'Read': 0,
-      }),
+      body: body,
     );
 
     if (response.statusCode == 201) {
@@ -63,7 +88,6 @@ class _CreateDisposisiState extends State<CreateDisposisi> {
   }
 
   void _batal() {
-    // Navigasi kembali tanpa menyimpan
     Navigator.pop(context);
   }
 
@@ -89,8 +113,7 @@ class _CreateDisposisiState extends State<CreateDisposisi> {
               _buildTextField(pengirimIdController, 'Pengirim ID', true),
               _buildTextField(penerimaIdController, 'Penerima ID', true),
               _buildTextField(disposisiController, 'Disposisi', true),
-              _buildTextField(keteranganController, 'Keterangan', false,
-                  maxLines: 2),
+              _buildTextField(keteranganController, 'Keterangan', false),
               _buildTextField(statusController, 'Status', true),
               _buildDateField(tglVerifikasiController, 'Tanggal Verifikasi'),
               SizedBox(height: 20),

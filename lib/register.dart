@@ -19,7 +19,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   void _register() async {
     if (_formKey.currentState?.validate() ?? false) {
-      var url = Uri.parse('http://192.168.102.246:8000/api/register');
+      var url = Uri.parse('http://192.168.62.246:8000/api/register');
 
       try {
         var response = await http.post(

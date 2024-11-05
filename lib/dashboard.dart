@@ -29,7 +29,7 @@ class _DashboardPageState extends State<DashboardPage> {
   Future<void> _fetchSuratMasuk() async {
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.102.246:8000/api/surat_masuks'),
+        Uri.parse('http://192.168.62.246:8000/api/surat_masuks'),
       );
 
       if (response.statusCode == 200) {

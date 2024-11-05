@@ -21,7 +21,7 @@ class _SuratMasukListState extends State<SuratMasukList> {
   Future<void> _fetchSuratMasuk() async {
     try {
       final response = await http
-          .get(Uri.parse('http://192.168.102.246:8000/api/surat_masuks'));
+          .get(Uri.parse('http://192.168.62.246:8000/api/surat_masuks'));
       // .get(Uri.parse('http://192.168.0.104:8000/api/surat_masuks'));
 
       if (response.statusCode == 200) {

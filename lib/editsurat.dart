@@ -52,7 +52,7 @@ class _EditSuratPageState extends State<EditSuratPage> {
     var request = http.MultipartRequest(
       'POST', // Menggunakan POST sebagai pengganti PUT
       Uri.parse(
-          'http://192.168.102.246:8000/api/surat_masuks/${widget.nomorSurat}'),
+          'http://192.168.62.246:8000/api/surat_masuks/${widget.nomorSurat}'),
     );
 
     request.headers['X-HTTP-Method-Override'] = 'PUT';

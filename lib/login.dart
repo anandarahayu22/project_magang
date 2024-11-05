@@ -31,7 +31,7 @@ class _LoginPageState extends State<LoginPage> {
         _isLoading = true;
       });
 
-      var url = Uri.parse('http://192.168.102.246:8000/api/login');
+      var url = Uri.parse('http://192.168.62.246:8000/api/login');
 
       try {
         var response = await http.post(
