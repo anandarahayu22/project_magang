@@ -12,22 +12,17 @@ class _ProfilePageState extends State<ProfilePage> {
   Map<String, dynamic>? profileData;
 
   Future<void> fetchProfileData() async {
-    var url = Uri.parse('http://192.168.102.246:8000/api/profiles/1');
-    // alamat url akan dinamis sesuai dengan id token yang disimpan
-
-    // Ambil token dari SharedPreferences
-    String? token = await _getToken();
-    if (token == null) {
-      print('Token tidak ditemukan');
-      return;
-    }
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var userId = prefs.getString('id');
+    var token = prefs.getString('token');
+    var url = Uri.parse('http://192.168.167.246:8000/api/profiles/$userId');
 
     try {
       var response = await http.get(
         url,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token', // Menggunakan token yang diambil
+          'Authorization': 'Bearer $token',
         },
       );
 
@@ -38,42 +33,81 @@ class _ProfilePageState extends State<ProfilePage> {
       } else {
         print(
             'Gagal mendapatkan data profil. Status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
       }
     } catch (e) {
       print('Terjadi kesalahan: $e');
     }
   }
 
-  Future<String?> _getToken() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString('auth_token');
-  }
-
   @override
   void initState() {
     super.initState();
-    fetchProfileData(); // Memuat data profil saat halaman terbuka
+    fetchProfileData();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile'),
+        title: Text(
+          'Profile',
+          style: TextStyle(color: Colors.white, fontSize: 25),
+        ),
+        centerTitle: true,
+        iconTheme: IconThemeData(color: Colors.white),
+        backgroundColor: Colors.blueGrey,
       ),
       body: profileData == null
           ? Center(child: CircularProgressIndicator())
           : Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text('Username: ${profileData?['username']}'),
-                  Text('Name: ${profileData?['name']}'),
-                  Text('Email: ${profileData?['email']}'),
-                  Text('Phone: ${profileData?['phone']}'),
-                  Text('Address: ${profileData?['address']}'),
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(height: 20),
+                  Icon(
+                    Icons.person,
+                    size: 80,
+                    color: Colors.grey,
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    '${profileData?['username'] ?? 'Username'}',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  Text(
+                    '${profileData?['name'] ?? 'Name'}',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.grey[700],
+                    ),
+                  ),
+                  Divider(height: 40, thickness: 1.5),
+                  ListTile(
+                    leading: Icon(Icons.email, color: Colors.blueGrey),
+                    title: Text(
+                      '${profileData?['email'] ?? 'Email'}',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.phone, color: Colors.blueGrey),
+                    title: Text(
+                      '${profileData?['phone'] ?? 'Phone'}',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.home, color: Colors.blueGrey),
+                    title: Text(
+                      '${profileData?['address'] ?? 'Address'}',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
                 ],
               ),
             ),

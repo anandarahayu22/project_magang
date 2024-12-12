@@ -1,9 +1,11 @@
+import 'login.dart';
 import 'dart:convert';
 import 'profile.dart';
 import 'tambahsurat.dart';
 import 'detail_suratmasuk.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DashboardPage extends StatefulWidget {
   final Function onLogout;
@@ -17,6 +19,8 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   List<dynamic> _suratMasukList = [];
   bool _isLoading = true;
+  int totalDisposisiDone = 0;
+  int totalSuratBelumDibuka = 0;
 
   @override
   void initState() {
@@ -26,13 +30,18 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Future<void> _fetchSuratMasuk() async {
     try {
-      final response = await http
-          .get(Uri.parse('http://192.168.102.246:8000/api/surat_masuks'));
-      // .get(Uri.parse('http://192.168.0.103:8000/api/surat_masuks'));
+      final response = await http.get(
+        Uri.parse('http://192.168.167.246:8000/api/surat_masuks'),
+      );
 
       if (response.statusCode == 200) {
+        final List<dynamic> suratMasukData = jsonDecode(response.body);
         setState(() {
-          _suratMasukList = jsonDecode(response.body);
+          _suratMasukList = suratMasukData;
+          totalDisposisiDone =
+              suratMasukData.where((surat) => surat['status'] == 2).length;
+          totalSuratBelumDibuka =
+              suratMasukData.where((surat) => surat['status'] == 0).length;
           _isLoading = false;
         });
       } else {
@@ -46,13 +55,17 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
+  Future<void> _logout() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    int totalSurat = _suratMasukList.length;
-    int suratBelumDibuka = _suratMasukList
-        .where((surat) => surat['status'] == 'Belum Dibuka')
-        .length;
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -75,7 +88,32 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
           IconButton(
             icon: Icon(Icons.logout),
-            onPressed: () => widget.onLogout(),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text("Anda Yakin Ingin Keluar?"),
+                    // content: Text("Apakah Anda yakin ingin logout?"),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context); // Tutup dialog
+                        },
+                        child: Text("Tidak"),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context); // Tutup dialog
+                          _logout(); // Panggil fungsi logout
+                        },
+                        child: Text("Yakin"),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
           ),
         ],
       ),
@@ -108,7 +146,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                 ),
                                 SizedBox(height: 8.0),
                                 Text(
-                                  '$totalSurat',
+                                  '$totalDisposisiDone',
                                   style: TextStyle(
                                       color: Colors.white, fontSize: 23),
                                 ),
@@ -130,13 +168,13 @@ class _DashboardPageState extends State<DashboardPage> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  'Surat belum dibuka',
+                                  'Surat Belum Dibuka',
                                   style: TextStyle(
                                       color: Colors.white, fontSize: 20),
                                 ),
                                 SizedBox(height: 8.0),
                                 Text(
-                                  '$suratBelumDibuka',
+                                  '$totalSuratBelumDibuka', // Jumlah belum dibuka
                                   style: TextStyle(
                                       color: Colors.white, fontSize: 23),
                                 ),
@@ -153,56 +191,93 @@ class _DashboardPageState extends State<DashboardPage> {
                     itemCount: _suratMasukList.length,
                     itemBuilder: (context, index) {
                       final surat = _suratMasukList[index];
-                      return InkWell(
-                        onTap: () {
-                          // Navigasi ke halaman detail surat
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => DetailSuratMasukPage(
-                                nomorSurat: surat['nomor_surat'],
-                                pengirim: surat['pengirim'],
-                                tujuan: surat['tujuan'],
-                                perihal: surat['perihal'],
-                                tanggalSurat: surat['tanggal_surat'],
-                                tanggalTerima: surat['tanggal_terima'],
-                                filePath: surat['file_surat'],
-                              ),
-                            ),
-                          );
-                        },
-                        child: Card(
-                          margin: EdgeInsets.symmetric(
-                              vertical: 0, horizontal: 16.0),
-                          elevation: 10,
-                          color: Colors.blueGrey[50],
-                          child: Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    surat['nomor_surat'],
-                                    style: TextStyle(
-                                      color: Color.fromARGB(255, 19, 19, 19),
-                                      fontSize: 16,
+                      Color iconColor = surat['status'] == 0
+                          ? Colors.red
+                          : surat['status'] == 1
+                              ? Colors.yellow
+                              : Colors.green;
+
+                      return Column(
+                        children: [
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => DetailSuratMasukPage(
+                                    nomorSurat: surat['nomor_surat'],
+                                    pengirim: surat['pengirim'],
+                                    tujuan: surat['tujuan'],
+                                    perihal: surat['perihal'],
+                                    tanggalSurat: surat['tanggal_surat'],
+                                    tanggalTerima: surat['tanggal_terima'],
+                                    idSurat: surat['id'],
+                                    filePath: surat['file_surat'],
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              color: Colors.white,
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 12.0, horizontal: 16.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  CircleAvatar(
+                                    backgroundColor: iconColor,
+                                    child: Icon(
+                                      Icons.email,
+                                      color: Colors.white,
                                     ),
                                   ),
-                                ),
-                                SizedBox(width: 8.0),
-                                Expanded(
-                                  child: Text(
-                                    surat['status'],
-                                    style: TextStyle(
-                                        fontSize: 14, color: Colors.grey),
-                                    textAlign: TextAlign.right,
+                                  SizedBox(width: 16.0),
+                                  Expanded(
+                                    child: Text(
+                                      surat['tujuan'],
+                                      style: TextStyle(
+                                        color: Colors.black87,
+                                        fontSize: 16,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ],
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        Text(
+                                          surat['perihal'],
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.grey,
+                                          ),
+                                          textAlign: TextAlign.right,
+                                        ),
+                                        SizedBox(height: 4.0),
+                                        Text(
+                                          surat['pengirim'],
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey[600],
+                                          ),
+                                          textAlign: TextAlign.right,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
+                          Divider(
+                            color: Colors.grey,
+                            thickness: 1.0,
+                            indent: 16.0,
+                            endIndent: 16.0,
+                          ),
+                        ],
                       );
                     },
                   ),
