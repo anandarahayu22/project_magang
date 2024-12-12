@@ -75,7 +75,7 @@ class _CreateDisposisiState extends State<CreateDisposisi> {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.pop(context); // Tutup dialog
+                  Navigator.pop(context);
                   Navigator.pop(context); // Kembali ke halaman sebelumnya
                 },
                 child: Text("OK"),
