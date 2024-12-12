@@ -20,8 +20,6 @@ class _LoginPageState extends State<LoginPage> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('id', id);
     await prefs.setString('token', token);
-    // print(id);
-    // print(token);
   }
 
   // Fungsi untuk login
@@ -31,7 +29,7 @@ class _LoginPageState extends State<LoginPage> {
         _isLoading = true;
       });
 
-      var url = Uri.parse('http://192.168.62.246:8000/api/login');
+      var url = Uri.parse('http://192.168.167.246:8000/api/login');
 
       try {
         var response = await http.post(
@@ -47,7 +45,6 @@ class _LoginPageState extends State<LoginPage> {
           var data = jsonDecode(response.body);
           var token = data['token'];
           var userId = data['user']['id'].toString(); // Ambil id dari respons
-          // print(userId);
           // Simpan id dan token ke shared_preferences
           await _saveLoginData(userId, token);
 
@@ -91,68 +88,98 @@ class _LoginPageState extends State<LoginPage> {
         backgroundColor: Colors.blueGrey,
         automaticallyImplyLeading: false,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              TextFormField(
-                controller: _emailController,
-                decoration: InputDecoration(labelText: 'Email'),
-                keyboardType: TextInputType.emailAddress,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Silakan masukkan email Anda';
-                  }
-                  if (!value.contains('@')) {
-                    return 'Silakan masukkan alamat email yang valid';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _passwordController,
-                obscureText: _obscurePassword,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      Icons.remove_red_eye,
-                      color: _obscurePassword ? Colors.grey : Colors.blue,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _obscurePassword = !_obscurePassword;
-                      });
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  TextFormField(
+                    controller: _emailController,
+                    decoration: InputDecoration(labelText: 'Email'),
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Silakan masukkan email Anda';
+                      }
+                      if (!value.contains('@')) {
+                        return 'Silakan masukkan alamat email yang valid';
+                      }
+                      return null;
                     },
                   ),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Silakan masukkan kata sandi Anda';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 20),
-              _isLoading
-                  ? Center(child: CircularProgressIndicator())
-                  : ElevatedButton(
-                      onPressed: _login,
-                      child: Text('Login'),
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: _obscurePassword,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.remove_red_eye,
+                          color: _obscurePassword ? Colors.grey : Colors.blue,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
                     ),
-              SizedBox(height: 20),
-              TextButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/register');
-                },
-                child: Text('Belum punya akun? Register'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Silakan masukkan kata sandi Anda';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 20),
+                  _isLoading
+                      ? SizedBox.shrink()
+                      : ElevatedButton(
+                          onPressed: _login,
+                          child: Text('Login'),
+                        ),
+                  SizedBox(height: 20),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/register');
+                    },
+                    child: Text('Belum punya akun? Register'),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
+          if (_isLoading)
+            Stack(
+              children: [
+                ModalBarrier(
+                  dismissible: false,
+                  color: Colors.black.withOpacity(0.5),
+                ),
+                Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text(
+                        'Harap Tunggu...',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+        ],
       ),
     );
   }

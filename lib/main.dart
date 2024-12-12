@@ -93,6 +93,7 @@ class _MyAppState extends State<MyApp> {
                   tanggalSurat: args['tanggalSurat'],
                   tanggalTerima: args['tanggalTerima'],
                   filePath: args['filePath'],
+                  idSurat: args['idSurat'],
                 );
               },
             );

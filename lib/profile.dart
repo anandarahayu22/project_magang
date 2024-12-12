@@ -15,7 +15,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     var userId = prefs.getString('id');
     var token = prefs.getString('token');
-    var url = Uri.parse('http://192.168.62.246:8000/api/profiles/$userId');
+    var url = Uri.parse('http://192.168.167.246:8000/api/profiles/$userId');
 
     try {
       var response = await http.get(

@@ -12,7 +12,7 @@ class LampiranSuratPage extends StatelessWidget {
   Future<void> _downloadAndOpenPDF(BuildContext context) async {
     try {
       final String pdfUrl =
-          'http://192.168.62.246:8000/uploads/surat_masuk/$nomorSurat.pdf';
+          'http://192.168.30.238:8000/uploads/surat_masuk/$nomorSurat.pdf';
 
       // Mendapatkan direktori sementara
       final dir = await getTemporaryDirectory();

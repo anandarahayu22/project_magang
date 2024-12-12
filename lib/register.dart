@@ -16,10 +16,15 @@ class _RegisterPageState extends State<RegisterPage> {
   final _phoneController = TextEditingController();
   final _addressController = TextEditingController();
   bool _obscurePassword = true; // Variabel untuk menyembunyikan password
+  bool _isLoading = false; // Indikator loading
 
   void _register() async {
     if (_formKey.currentState?.validate() ?? false) {
-      var url = Uri.parse('http://192.168.62.246:8000/api/register');
+      setState(() {
+        _isLoading = true; // Tampilkan indikator loading
+      });
+
+      var url = Uri.parse('http://192.168.167.246:8000/api/register');
 
       try {
         var response = await http.post(
@@ -51,6 +56,10 @@ class _RegisterPageState extends State<RegisterPage> {
           SnackBar(content: Text('Terjadi kesalahan: ${e.toString()}')),
         );
       }
+
+      setState(() {
+        _isLoading = false; // Sembunyikan indikator loading
+      });
     }
   }
 
@@ -66,111 +75,139 @@ class _RegisterPageState extends State<RegisterPage> {
         iconTheme: IconThemeData(color: Colors.white),
         backgroundColor: Colors.blueGrey,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              TextFormField(
-                controller: _usernameController,
-                decoration: InputDecoration(labelText: 'Username'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Silakan masukkan username anda';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _nameController,
-                decoration: InputDecoration(labelText: 'Name'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Silakan masukkan nama anda';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _emailController,
-                decoration: InputDecoration(labelText: 'Email'),
-                keyboardType: TextInputType.emailAddress,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Silakan masukkan email Anda';
-                  }
-                  if (!value.contains('@')) {
-                    return 'Silakan masukkan alamat email yang valid';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _passwordController,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                      color: _obscurePassword ? Colors.grey : Colors.blue,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _obscurePassword = !_obscurePassword;
-                      });
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  TextFormField(
+                    controller: _usernameController,
+                    decoration: InputDecoration(labelText: 'Username'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Silakan masukkan username anda';
+                      }
+                      return null;
                     },
                   ),
-                ),
-                obscureText: _obscurePassword,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Silakan masukkan kata sandi Anda';
-                  }
-                  if (value.length < 6) {
-                    return 'Kata sandi harus terdiri dari minimal 6 karakter';
-                  }
-                  return null;
-                },
+                  TextFormField(
+                    controller: _nameController,
+                    decoration: InputDecoration(labelText: 'Name'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Silakan masukkan nama anda';
+                      }
+                      return null;
+                    },
+                  ),
+                  TextFormField(
+                    controller: _emailController,
+                    decoration: InputDecoration(labelText: 'Email'),
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Silakan masukkan email Anda';
+                      }
+                      if (!value.contains('@')) {
+                        return 'Silakan masukkan alamat email yang valid';
+                      }
+                      return null;
+                    },
+                  ),
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: _obscurePassword,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.remove_red_eye,
+                          color: _obscurePassword ? Colors.grey : Colors.blue,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Silakan masukkan kata sandi Anda';
+                      }
+                      if (value.length < 6) {
+                        return 'Kata sandi harus terdiri dari minimal 6 karakter';
+                      }
+                      return null;
+                    },
+                  ),
+                  TextFormField(
+                    controller: _phoneController,
+                    decoration: InputDecoration(labelText: 'Phone'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Silakan masukkan nomor telepon Anda';
+                      }
+                      return null;
+                    },
+                  ),
+                  TextFormField(
+                    controller: _addressController,
+                    decoration: InputDecoration(labelText: 'Address'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Silakan masukkan alamat Anda';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: _register,
+                    child: Text('Register'),
+                  ),
+                  SizedBox(height: 20),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/login');
+                    },
+                    child: Text('Sudah punya akun? Login'),
+                  ),
+                ],
               ),
-              TextFormField(
-                controller: _phoneController,
-                decoration: InputDecoration(labelText: 'Phone'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Silakan masukkan nomor telepon Anda';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _addressController,
-                decoration: InputDecoration(labelText: 'Address'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Silakan masukkan alamat Anda';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _register,
-                child: Text('Register'),
-              ),
-              SizedBox(height: 20),
-              TextButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/login');
-                },
-                child: Text('Sudah punya akun? Login'),
-              ),
-            ],
+            ),
           ),
-        ),
+          if (_isLoading)
+            Stack(
+              children: [
+                ModalBarrier(
+                  dismissible: false,
+                  color: Colors.black.withOpacity(0.5),
+                ),
+                Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text(
+                        'Harap Tunggu...',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+        ],
       ),
     );
   }

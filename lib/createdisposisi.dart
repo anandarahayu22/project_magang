@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -7,12 +8,14 @@ class CreateDisposisi extends StatefulWidget {
   final String pengirim;
   final String tujuan;
   final String perihal;
+  final int idSurat;
 
   CreateDisposisi({
     required this.nomorSurat,
     required this.pengirim,
     required this.tujuan,
     required this.perihal,
+    required this.idSurat,
   });
 
   @override
@@ -53,21 +56,51 @@ class _CreateDisposisiState extends State<CreateDisposisi> {
     print("Data dikirim: $body"); // Debug print untuk memeriksa data
 
     final response = await http.post(
-      Uri.parse('http://192.168.62.246:8000/api/disposisis'),
+      Uri.parse('http://192.168.167.246:8000/api/disposisis'),
       headers: {
         'Content-Type': 'application/json',
       },
       body: body,
     );
 
+    log("Response add disposisi $response");
+
     if (response.statusCode == 201) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Disposisi berhasil dibuat')),
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Berhasil"),
+            content: Text("Disposisi berhasil dibuat."),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context); // Tutup dialog
+                  Navigator.pop(context); // Kembali ke halaman sebelumnya
+                },
+                child: Text("OK"),
+              ),
+            ],
+          );
+        },
       );
-      Navigator.pop(context);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal membuat disposisi')),
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Gagal"),
+            content: Text("Gagal membuat disposisi."),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context); // Tutup dialog
+                },
+                child: Text("OK"),
+              ),
+            ],
+          );
+        },
       );
     }
   }
@@ -122,6 +155,10 @@ class _CreateDisposisiState extends State<CreateDisposisi> {
                 children: [
                   ElevatedButton(
                     onPressed: _batal,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                    ),
                     child: Text('Batal'),
                   ),
                   SizedBox(width: 10),
@@ -131,6 +168,10 @@ class _CreateDisposisiState extends State<CreateDisposisi> {
                         createDisposisi();
                       }
                     },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                    ),
                     child: Text('Simpan'),
                   ),
                 ],

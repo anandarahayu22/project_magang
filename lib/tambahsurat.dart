@@ -25,7 +25,7 @@ class _TambahSuratPageState extends State<TambahSuratPage> {
   Future<void> _tambahSurat() async {
     var request = http.MultipartRequest(
       'POST',
-      Uri.parse('http://192.168.62.246:8000/api/surat_masuks'),
+      Uri.parse('http://192.168.167.246:8000/api/surat_masuks'),
     );
 
     request.fields['nomor_surat'] = _nomorSuratController.text;
@@ -47,10 +47,43 @@ class _TambahSuratPageState extends State<TambahSuratPage> {
     if (response.statusCode == 201) {
       print("Surat berhasil ditambahkan.");
       widget.onDataAdded();
-      Navigator.pop(context);
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Berhasil"),
+            content: Text("Surat berhasil ditambahkan."),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context); // Tutup dialog
+                  Navigator.pop(context); // Kembali ke halaman sebelumnya
+                },
+                child: Text("OK"),
+              ),
+            ],
+          );
+        },
+      );
     } else {
       print("Gagal menambahkan surat: ${response.statusCode}");
-      throw Exception('Failed to add surat');
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Gagal"),
+            content: Text("Gagal menambahkan surat: ${response.statusCode}"),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context); // Tutup dialog
+                },
+                child: Text("OK"),
+              ),
+            ],
+          );
+        },
+      );
     }
   }
 
@@ -115,12 +148,45 @@ class _TambahSuratPageState extends State<TambahSuratPage> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 ElevatedButton(
-                  onPressed: _batal,
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text("Konfirmasi"),
+                          content: Text("Apakah Anda yakin ingin membatalkan?"),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context); // Tutup dialog
+                              },
+                              child: Text("Tidak"),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context); // Tutup dialog
+                                _batal(); // Panggil fungsi batal
+                              },
+                              child: Text("Yakin"),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                  ),
                   child: Text('Batal'),
                 ),
                 SizedBox(width: 10),
                 ElevatedButton(
                   onPressed: _tambahSurat,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                  ),
                   child: Text('Simpan'),
                 ),
               ],
